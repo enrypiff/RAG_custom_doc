@@ -96,7 +96,7 @@ def get_response(text):
 
 def send_message():
     message = entry.get("1.0", tk.END)  # Specify the index range for getting the text
-    response = create_multiple_query(message)
+    response = get_response(message)
     chatbox.insert(tk.END, f"You: {message}\n")
     chatbox.insert(tk.END, f"Bot: {response}\n")
     entry.delete("1.0", tk.END)  # Specify the index range for deleting the text
