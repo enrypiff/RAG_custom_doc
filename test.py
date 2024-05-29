@@ -5,7 +5,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
 
 
-CHROMA_PATH = "chroma"
+CHROMA_PATH = "src/chroma"
 
 PROMPT_TEMPLATE = """
 Answer the question based only on the following context:

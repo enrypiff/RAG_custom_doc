@@ -7,7 +7,7 @@ import os
 import shutil
 
 # Define the path for Chroma and data
-CHROMA_PATH = "chroma"
+CHROMA_PATH = "src/chroma/"
 DATA_PATH = "books/"
 
 # Get the OpenAI API key from environment variables

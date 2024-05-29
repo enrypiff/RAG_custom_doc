@@ -11,7 +11,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain import hub
 
-CHROMA_PATH = "chroma"
+CHROMA_PATH = "src/chroma"
 
 embedding_function = OpenAIEmbeddings()
 db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
