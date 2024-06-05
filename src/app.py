@@ -24,6 +24,25 @@ def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
 def get_response(text):
+    """
+    Retrieves a response based on the given text.
+
+    Args:
+        text (str): The input text to generate a response for.
+
+    Returns:
+        tuple: A tuple containing the generated answer, sources, and pages.
+
+    Raises:
+        None
+
+    Example:
+        >>> get_response("What is the capital of France?")
+        ("Paris is the capital of France.", ["Wikipedia"], [1])
+    """
+    # Rest of the code...
+def get_response(text):
+
     # RAG
     template = """Answer the following question based on this context:
 
