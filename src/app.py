@@ -50,13 +50,14 @@ def get_response(text):
 
     answer = rag_chain_with_source.invoke(text)
     answer_cleaned = answer['answer']
+    sources = []
+    pages = []
 
     for doc in answer['context']:
-        answer_cleaned += "\n"
-        answer_cleaned += f"Source: {doc.metadata['source']} "
-        answer_cleaned += f"Page: {doc.metadata['page']}"
-    
-    return answer_cleaned
+        sources.append(doc.metadata['source'])
+        pages.append(doc.metadata['page'])
+
+    return answer_cleaned, sources, pages
 
 
 @app.route('/', methods=['GET'])
@@ -71,11 +72,11 @@ def chatbot_api():
     data = request.get_json()
     message = data['message']
 
-    response = get_response(message)
+    response, sources, pages = get_response(message)
 
     app.logger.info('Successfully processed request to /chatbot')
 
-    return jsonify({'response': response})
+    return jsonify({'response': response, 'sources': sources, 'pages': pages})
     
 
 

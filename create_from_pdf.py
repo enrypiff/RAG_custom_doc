@@ -1,7 +1,8 @@
 from langchain_community.document_loaders import DirectoryLoader, PyMuPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter, CharacterTextSplitter
 from langchain.schema import Document
-from langchain_community.embeddings import OpenAIEmbeddings
+# from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 import os
 import shutil
@@ -54,7 +55,7 @@ def split_text(data):
     # Create a RecursiveCharacterTextSplitter object with specified parameters
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=800,
-        chunk_overlap=80,
+        chunk_overlap=100,
         length_function=len,
         is_separator_regex=False,
     )
@@ -92,8 +93,7 @@ def save_to_chroma(chunks: 'list[Document]'):
     db = Chroma.from_documents(
         chunks, OpenAIEmbeddings(), persist_directory=CHROMA_PATH
     )
-    # Persist the database
-    db.persist()
+
     # Print the number of chunks saved and the path where they are saved
     print(f"Saved {len(chunks)} chunks to {CHROMA_PATH}.")
 

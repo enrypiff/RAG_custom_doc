@@ -85,33 +85,40 @@ def get_response(text):
 
     answer = rag_chain_with_source.invoke(text)
     answer_cleaned = answer['answer']
+    sources = []
+    pages = []
 
     for doc in answer['context']:
-        answer_cleaned += "\n"
-        answer_cleaned += f"Source: {doc.metadata['source']} "
-        answer_cleaned += f"Page: {doc.metadata['page']}"
-    
-    return answer_cleaned
+        sources.append(doc.metadata['source'])
+        pages.append(doc.metadata['page'])
+
+    return answer_cleaned, sources, pages
 
 
 def send_message():
-    message = entry.get("1.0", tk.END)  # Specify the index range for getting the text
-    response = get_response(message)
-    chatbox.insert(tk.END, f"You: {message}\n")
-    chatbox.insert(tk.END, f"Bot: {response}\n")
+    query = entry.get("1.0", tk.END).strip()  # Specify the index range for getting the text and remove leading/trailing whitespace
+    response, sources, pages = get_response(query)
+    chatbox.insert(tk.END, f"You: {query}\n", "user")  # Set the tag "user" for the text
+    chatbox.insert(tk.END, f"Bot: {response}\n", "bot")  # Set the tag "bot" for the text
+    for source, page in zip(sources, pages):
+        chatbox.insert(tk.END, f"Source: {source}, Page: {page + 1}\n", "source") # Set the tag "source" for the text
+    chatbox.insert(tk.END, f"\n")
     entry.delete("1.0", tk.END)  # Specify the index range for deleting the text
-
 
 # Create the main window
 window = tk.Tk()
 window.title("Chatbot UI")
 
 # Create a text widget to display the chat history
-chatbox = tk.Text(window, height=20, width=50)  # Adjust the height and width as desired
+chatbox = tk.Text(window, height=20, width=100, wrap=tk.WORD)  # Adjust the height and width as desired, set wrap option to WORD
+# Configure the text widget tags for color and style
+chatbox.tag_configure("user", foreground="black", font=("Arial", 12, "bold"))
+chatbox.tag_configure("bot", foreground="black", font=("Arial", 12, "italic"))
+chatbox.tag_configure("source", foreground="black", font=("Arial", 9, "italic"))
 chatbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)  # Automatically resize with the window and add margin
 
 # Create a text widget for user input
-entry = tk.Text(window, height=5, width=50)  # Adjust the height and width as desired
+entry = tk.Text(window, height=5, width=100)  # Adjust the height and width as desired
 entry.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)  # Automatically resize with the window and add margin
 
 # Create a button to send the message
