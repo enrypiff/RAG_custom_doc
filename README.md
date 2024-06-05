@@ -29,6 +29,6 @@ python ui_app_without_server.py
 
 Some examples of the chatbot in action:
 
-![image](https://github.com/enrypiff/RAG_custom_doc/assets/example1.png)
-![image](https://github.com/enrypiff/RAG_custom_doc/assets/example2.png)
-![image](https://github.com/enrypiff/RAG_custom_doc/assets/example3.png)
+![image](assets/example1.png)
+![image](assets/example2.png)
+![image](assets/example3.png)
