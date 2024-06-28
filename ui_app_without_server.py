@@ -17,41 +17,16 @@ embedding_function = OpenAIEmbeddings()
 db = Chroma(persist_directory=CHROMA_PATH, embedding_function=embedding_function)
 retriever = db.as_retriever(search_kwargs={"k": 3})
 
-def get_unique_union(documents: 'list[list]'):
-    """ Unique union of retrieved docs """
-    # Flatten list of lists, and convert each Document to string
-    flattened_docs = [dumps(doc) for sublist in documents for doc in sublist]
-    # Get unique documents
-    unique_docs = list(set(flattened_docs))
-    # Return
-    return [loads(doc) for doc in unique_docs]
-
-
-
-def create_multiple_query(query_text):
-    # Multi Query: Different Perspectives
-    template = """You are an AI language model assistant. Your task is to generate five 
-    different versions of the given user question to retrieve relevant documents from a vector 
-    database. By generating multiple perspectives on the user question, your goal is to help
-    the user overcome some of the limitations of the distance-based similarity search. 
-    Provide these alternative questions separated by newlines. Original question: {question}"""
-    prompt_perspectives = ChatPromptTemplate.from_template(template)
-
-    generate_queries = (
-        prompt_perspectives 
-        | ChatOpenAI(temperature=0) 
-        | StrOutputParser() 
-        | (lambda x: x.split("\n"))
-    )
-
-    # Retrieve
-    retrieval_chain = generate_queries | retriever.map() | get_unique_union
-    docs = retrieval_chain.invoke({"question":query_text})
-    print(len(docs))
-    print(docs)
-    return retrieval_chain
-
 def format_docs(docs):
+    """
+    Formats a list of documents.
+
+    Args:
+        docs (list): A list of documents.
+
+    Returns:
+        str: A formatted string containing the page content of each document, separated by two newlines.
+    """
     return "\n\n".join(doc.page_content for doc in docs)
 
 def get_response(text):
@@ -83,28 +58,29 @@ def get_response(text):
     prompt = ChatPromptTemplate.from_template(template)
     # print(prompt)
 
-    # LLM
+# LLM
     llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0)
-    
-    # prompt_hub_rag = hub.pull("rlm/rag-prompt")
-    # prompt_hub_rag
 
+    # Define the RAG chain
     rag_chain_from_docs = (
-        RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
-        | prompt
-        | llm
-        | StrOutputParser()
+        RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))  # Extract the context from the documents
+        | prompt  # Add the prompt to the chain
+        | llm  # Use the language model for generating the answer
+        | StrOutputParser()  # Parse the output as a string
     )
 
+    # Define the RAG chain with source
     rag_chain_with_source = RunnableParallel(
-        {"context": retriever, "question": RunnablePassthrough()}
-    ).assign(answer=rag_chain_from_docs)
+        {"context": retriever, "question": RunnablePassthrough()}  # Retrieve the relevant documents and pass the question
+    ).assign(answer=rag_chain_from_docs)  # Assign the answer from the RAG chain
 
+    # Invoke the RAG chain with source
     answer = rag_chain_with_source.invoke(text)
     answer_cleaned = answer['answer']
     sources = []
     pages = []
 
+    # Extract the source and page information from the documents
     for doc in answer['context']:
         sources.append(doc.metadata['source'])
         pages.append(doc.metadata['page'])
